@@ -10,65 +10,100 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('recipes', '0001_initial'),
+        ("recipes", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='shoppingcart',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='shopping_cart', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь'),
+            model_name="shoppingcart",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="shopping_cart",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Пользователь",
+            ),
         ),
         migrations.AddField(
-            model_name='recipeingredient',
-            name='ingredient',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='recipes.ingredient', verbose_name='Ингредиент'),
+            model_name="recipeingredient",
+            name="ingredient",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="recipes.ingredient",
+                verbose_name="Ингредиент",
+            ),
         ),
         migrations.AddField(
-            model_name='recipeingredient',
-            name='recipe',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='recipes.recipe', verbose_name='Рецепт'),
+            model_name="recipeingredient",
+            name="recipe",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="recipes.recipe",
+                verbose_name="Рецепт",
+            ),
         ),
         migrations.AddField(
-            model_name='recipe',
-            name='author',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='recipes', to=settings.AUTH_USER_MODEL, verbose_name='Автор рецепта'),
+            model_name="recipe",
+            name="author",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="recipes",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Автор рецепта",
+            ),
         ),
         migrations.AddField(
-            model_name='recipe',
-            name='ingredients',
-            field=models.ManyToManyField(related_name='recipes', through='recipes.RecipeIngredient', to='recipes.ingredient', verbose_name='Ингредиенты'),
+            model_name="recipe",
+            name="ingredients",
+            field=models.ManyToManyField(
+                related_name="recipes",
+                through="recipes.RecipeIngredient",
+                to="recipes.ingredient",
+                verbose_name="Ингредиенты",
+            ),
         ),
         migrations.AddField(
-            model_name='recipe',
-            name='tags',
-            field=models.ManyToManyField(related_name='recipes', to='recipes.tag', verbose_name='Теги'),
+            model_name="recipe",
+            name="tags",
+            field=models.ManyToManyField(
+                related_name="recipes", to="recipes.tag", verbose_name="Теги"
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='ingredient',
-            unique_together={('name', 'measurement_unit')},
+            name="ingredient",
+            unique_together={("name", "measurement_unit")},
         ),
         migrations.AddField(
-            model_name='favorite',
-            name='recipe',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorited_by', to='recipes.recipe', verbose_name='Рецепт'),
+            model_name="favorite",
+            name="recipe",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="favorited_by",
+                to="recipes.recipe",
+                verbose_name="Рецепт",
+            ),
         ),
         migrations.AddField(
-            model_name='favorite',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='favorites', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь'),
+            model_name="favorite",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="favorites",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Пользователь",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='shoppingcart',
-            unique_together={('user', 'recipe')},
+            name="shoppingcart",
+            unique_together={("user", "recipe")},
         ),
         migrations.AlterUniqueTogether(
-            name='recipeingredient',
-            unique_together={('recipe', 'ingredient')},
+            name="recipeingredient",
+            unique_together={("recipe", "ingredient")},
         ),
         migrations.AlterUniqueTogether(
-            name='favorite',
-            unique_together={('user', 'recipe')},
+            name="favorite",
+            unique_together={("user", "recipe")},
         ),
     ]

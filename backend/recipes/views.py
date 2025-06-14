@@ -11,6 +11,7 @@ User = get_user_model()
 
 # Create your views here.
 
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserCreateSerializer
@@ -24,7 +25,4 @@ class UserViewSet(viewsets.ModelViewSet):
             return response
         except Exception as e:
             logger.error(f"Error creating user: {str(e)}")
-            return Response(
-                {"error": str(e)},
-                status=400
-            )
+            return Response({"error": str(e)}, status=400)

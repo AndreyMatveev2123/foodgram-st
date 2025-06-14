@@ -5,6 +5,7 @@ class CustomPageNumberPagination(PageNumberPagination):
     """
     Custom pagination class with configurable page size.
     """
+
     page_size = 6
-    page_size_query_param = 'limit'
-    max_page_size = 100 
+    page_size_query_param = "limit"
+    max_page_size = 100

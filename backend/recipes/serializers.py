@@ -6,32 +6,33 @@ import logging
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
+
 class UserCreateSerializer(BaseUserCreateSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password')
+        fields = ("id", "username", "email", "password")
         extra_kwargs = {
-            'password': {'write_only': True},
-            'username': {'required': True},
-            'email': {'required': True}
+            "password": {"write_only": True},
+            "username": {"required": True},
+            "email": {"required": True},
         }
 
     def validate(self, attrs):
         logger.info(f"Validating data: {attrs}")
-        username = attrs.get('username')
-        email = attrs.get('email')
+        username = attrs.get("username")
+        email = attrs.get("email")
 
         # Проверяем существование пользователя с таким username
         if User.objects.filter(username=username).exists():
-            raise serializers.ValidationError({
-                'username': 'Пользователь с таким именем уже существует'
-            })
+            raise serializers.ValidationError(
+                {"username": "Пользователь с таким именем уже существует"}
+            )
 
         # Проверяем существование пользователя с таким email
         if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError({
-                'email': 'Пользователь с таким email уже существует'
-            })
+            raise serializers.ValidationError(
+                {"email": "Пользователь с таким email уже существует"}
+            )
 
         return attrs
 
@@ -39,9 +40,9 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         logger.info(f"Creating user with data: {validated_data}")
         try:
             user = User.objects.create_user(
-                username=validated_data['username'],
-                email=validated_data['email'],
-                password=validated_data['password']
+                username=validated_data["username"],
+                email=validated_data["email"],
+                password=validated_data["password"],
             )
             logger.info(f"User created successfully: {user.username}")
             return user
@@ -57,4 +58,4 @@ class UserCreateSerializer(BaseUserCreateSerializer):
     def validate_username(self, value):
         if User.objects.filter(username=value).exists():
             raise serializers.ValidationError("Username already exists")
-        return value 
+        return value

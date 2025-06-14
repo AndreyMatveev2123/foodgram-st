@@ -30,9 +30,7 @@ class CustomUserSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            return Subscription.objects.filter(
-                user=request.user, author=obj
-            ).exists()
+            return obj.subscribers.filter(user=request.user).exists()
         return False
 
 
@@ -74,7 +72,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class RecipeIngredientWriteSerializer(serializers.Serializer):
     """Serializer for RecipeIngredient model (for writing)."""
     id = serializers.IntegerField()
-    amount = serializers.IntegerField()
+    amount = serializers.IntegerField(min_value=1, max_value=32000)
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -100,17 +98,13 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            return Favorite.objects.filter(
-                user=request.user, recipe=obj
-            ).exists()
+            return obj.favorited_by.filter(user=request.user).exists()
         return False
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            return ShoppingCart.objects.filter(
-                user=request.user, recipe=obj
-            ).exists()
+            return obj.in_shopping_cart.filter(user=request.user).exists()
         return False
 
 
@@ -121,6 +115,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all(), many=True
     )
     image = Base64ImageField()
+    cooking_time = serializers.IntegerField(min_value=1, max_value=32000)
 
     class Meta:
         model = Recipe

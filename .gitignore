@@ -170,3 +170,14 @@ __pycache__/
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Virtual Environment
+.env
+.venv
+env/
+venv/
+ENV/
+
+# OS
+.DS_Store
+Thumbs.db

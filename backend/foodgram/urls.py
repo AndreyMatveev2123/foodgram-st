@@ -24,11 +24,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    # Djoser user endpoints (includes /me/)
-    path("api/users/", include("djoser.urls")),
-    # Djoser authentication endpoints (token-based login/logout)
     path("api/auth/", include("djoser.urls.authtoken")),
-    # Other API endpoints (your custom viewsets like recipes, tags, ingredients)
     path("api/", include("api.urls")),
     # JWT endpoints explicitly
     path(

@@ -165,8 +165,8 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
     ],
-    "DEFAULT_PAGINATION_CLASS": "api.pagination.CustomPageNumberPagination",
-    "PAGE_SIZE": 6,
+    # "DEFAULT_PAGINATION_CLASS": "api.pagination.CustomPageNumberPagination",
+    # "PAGE_SIZE": 6,
 }
 
 DJOSER = {
@@ -180,6 +180,10 @@ DJOSER = {
     "PERMISSIONS": {
         "user": ["rest_framework.permissions.AllowAny"],
         "user_list": ["rest_framework.permissions.AllowAny"],
+        "user_create": ["rest_framework.permissions.AllowAny"],
+    },
+    "VIEWS": {
+        "user": "api.views.CustomUserViewSet",
     },
 }
 

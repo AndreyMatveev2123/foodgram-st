@@ -7,6 +7,7 @@ Foodgram - это веб-приложение для публикации рец
 - Python 3.9+
 - Django 4.2
 - Django REST Framework
+- React
 - PostgreSQL
 - Docker
 - Nginx
@@ -103,6 +104,15 @@ docker-compose exec backend python manage.py migrate
 ```bash
 docker-compose exec backend python manage.py createsuperuser
 ```
+
+7. Загрузите начальные данные (ингредиенты и теги):
+
+   Убедитесь, что файлы `data/ingredients.csv` и `data/tags.csv` находятся в корневой директории проекта `foodgram-st`.
+
+   ```bash
+   docker-compose exec backend python manage.py import_ingredients
+   docker-compose exec backend python manage.py import_tags
+   ```
 
 ## Доступ к приложению
 

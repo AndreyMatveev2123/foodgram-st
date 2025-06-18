@@ -81,23 +81,14 @@ class IngredientSerializer(serializers.ModelSerializer):
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     """Serializer for RecipeIngredient model (for reading)."""
 
-    id = serializers.SerializerMethodField()
-    name = serializers.SerializerMethodField()
-    measurement_unit = serializers.SerializerMethodField()
+    id = serializers.ReadOnlyField(source='ingredient.id')
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    measurement_unit = serializers.ReadOnlyField(source='ingredient.measurement_unit')
     amount = serializers.IntegerField()
 
     class Meta:
         model = RecipeIngredient
         fields = ("id", "name", "measurement_unit", "amount")
-
-    def get_id(self, obj):
-        return obj.ingredient.id
-
-    def get_name(self, obj):
-        return obj.ingredient.name
-
-    def get_measurement_unit(self, obj):
-        return obj.ingredient.measurement_unit
 
 
 class RecipeIngredientWriteSerializer(serializers.Serializer):
@@ -111,9 +102,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for Recipe model."""
 
     author = CustomUserSerializer(read_only=True)
-    ingredients = RecipeIngredientSerializer(
-        source="recipeingredient_set", many=True, read_only=True
-    )
+    ingredients = RecipeIngredientSerializer(source='recipeingredient_set', many=True, read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -176,7 +165,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         if "ingredients" in validated_data:
             ingredients_data = validated_data.pop("ingredients")
-            instance.ingredients.clear()
+            instance.recipeingredient_set.all().delete()
             for ingredient_data in ingredients_data:
                 RecipeIngredient.objects.create(
                     recipe=instance,
@@ -192,3 +181,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
+    def to_representation(self, instance):
+        return RecipeSerializer(instance, context=self.context).data

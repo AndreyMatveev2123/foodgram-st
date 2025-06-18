@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from django.contrib.auth import get_user_model
-from recipes.models import Tag, Ingredient, Recipe
+from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient
 
 User = get_user_model()
 
@@ -40,7 +40,7 @@ class UserAuthTests(APITestCase):
         self.assertEqual(response.data['username'], 'testuser')
 
     def test_auth_token(self):
-        url = reverse('api:users-list') + 'auth/token/login/'
+        url = '/api/auth/token/login/'
         data = {'email': 'test@example.com', 'password': 'testpass123'}
         response = self.client.post(url, data)
         self.assertIn(response.status_code, [status.HTTP_200_OK, status.HTTP_201_CREATED, status.HTTP_204_NO_CONTENT])
@@ -51,19 +51,19 @@ class TagIngredientTests(APITestCase):
         Ingredient.objects.create(name='Соль', measurement_unit='г')
 
     def test_get_tags(self):
-        url = reverse('api:tag-list')
+        url = reverse('api:tags-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.data), 1)
 
     def test_get_ingredients(self):
-        url = reverse('api:ingredient-list')
+        url = reverse('api:ingredients-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.data), 1)
 
     def test_search_ingredient(self):
-        url = reverse('api:ingredient-list') + '?search=Сол'
+        url = reverse('api:ingredients-list') + '?search=Сол'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(any('Соль' in i['name'] for i in response.data))
@@ -90,7 +90,7 @@ class RecipeTests(APITestCase):
         }
 
     def test_create_recipe(self):
-        url = reverse('api:recipe-list')
+        url = reverse('api:recipes-list')
         data = self.recipe_data.copy()
         data['image'] = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
         response = self.client.post(url, data, format='json')
@@ -101,7 +101,7 @@ class RecipeTests(APITestCase):
         Recipe.objects.create(
             name='Тестовый рецепт', text='Описание', cooking_time=10, author=self.user
         )
-        url = reverse('api:recipe-list')
+        url = reverse('api:recipes-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.data['results']), 1)
@@ -110,7 +110,7 @@ class RecipeTests(APITestCase):
         recipe = Recipe.objects.create(
             name='Старое имя', text='Описание', cooking_time=10, author=self.user
         )
-        url = reverse('api:recipe-detail', args=[recipe.id])
+        url = reverse('api:recipes-detail', args=[recipe.id])
         data = {'name': 'Новое имя', 'text': 'Описание', 'cooking_time': 15}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -121,7 +121,7 @@ class RecipeTests(APITestCase):
         recipe = Recipe.objects.create(
             name='Удаляемый', text='Описание', cooking_time=10, author=self.user
         )
-        url = reverse('api:recipe-detail', args=[recipe.id])
+        url = reverse('api:recipes-detail', args=[recipe.id])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Recipe.objects.filter(id=recipe.id).exists())
@@ -130,7 +130,7 @@ class RecipeTests(APITestCase):
         recipe = Recipe.objects.create(
             name='Любимый', text='Описание', cooking_time=10, author=self.user
         )
-        url = reverse('api:recipe-favorite', args=[recipe.id])
+        url = reverse('api:recipes-favorite', args=[recipe.id])
         response = self.client.post(url)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response = self.client.delete(url)
@@ -140,7 +140,7 @@ class RecipeTests(APITestCase):
         recipe = Recipe.objects.create(
             name='В корзину', text='Описание', cooking_time=10, author=self.user
         )
-        url = reverse('api:recipe-shopping-cart', args=[recipe.id])
+        url = reverse('api:recipes-shopping-cart', args=[recipe.id])
         response = self.client.post(url)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response = self.client.delete(url)
@@ -150,10 +150,10 @@ class RecipeTests(APITestCase):
         recipe = Recipe.objects.create(
             name='В корзину', text='Описание', cooking_time=10, author=self.user
         )
-        recipe.ingredients.add(self.ingredient)
-        url = reverse('api:recipe-shopping-cart', args=[recipe.id])
+        RecipeIngredient.objects.create(recipe=recipe, ingredient=self.ingredient, amount=2)
+        url = reverse('api:recipes-shopping-cart', args=[recipe.id])
         self.client.post(url)
-        url = reverse('api:recipe-download-shopping-cart')
+        url = reverse('api:recipes-download-shopping-cart')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('Список покупок', response.content.decode())

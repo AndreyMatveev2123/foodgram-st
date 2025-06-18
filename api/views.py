@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
-from recipes.models import Recipe, Tag, Ingredient, Favorite, ShoppingCart
+from recipes.models import Recipe, Tag, Ingredient, Favorite, ShoppingCart, RecipeIngredient
 from users.models import Subscription
 from .filters import RecipeFilter
 from .pagination import CustomPageNumberPagination
@@ -162,19 +162,28 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=False, permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
         user = request.user
-        ingredients = (
-            RecipeIngredient.objects.filter(recipe__shopping_cart__user=user)
-            .values("ingredient__name", "ingredient__measurement_unit")
-            .annotate(total_amount=Sum("amount"))
-        )
+        recipes = Recipe.objects.filter(in_shopping_cart__user=user)
 
-        shopping_list = ["Список покупок:\n"]
-        for ingredient in ingredients:
-            shopping_list.append(
-                f'{ingredient["ingredient__name"]} - '
-                f'{ingredient["total_amount"]} '
-                f'{ingredient["ingredient__measurement_unit"]}\n'
+        if not recipes.exists():
+            return Response(
+                {"error": "Список покупок пуст"},
+                status=status.HTTP_400_BAD_REQUEST
             )
+
+        shopping_list = ["Список покупок\n\n"]
+        
+        for i, recipe in enumerate(recipes):
+            shopping_list.append(f"{recipe.name}\n")
+            shopping_list.append(f"{recipe.cooking_time} МИН.\n\n")
+            
+            ingredients = RecipeIngredient.objects.filter(recipe=recipe)
+            for ingredient in ingredients:
+                shopping_list.append(
+                    f"- {ingredient.ingredient.name}\n"
+                )
+            
+            if i < len(recipes) - 1:
+                shopping_list.append("\n")
 
         response = HttpResponse("".join(shopping_list), content_type="text/plain")
         response["Content-Disposition"] = 'attachment; filename="shopping_list.txt"'
